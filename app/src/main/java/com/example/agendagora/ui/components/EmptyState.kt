@@ -8,12 +8,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun EmptyState(message: String) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = message)
+fun EmptyState(
+    title: String = "Nada por aqui",
+    message: String = "Tente alterar os filtros ou volte mais tarde",
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(24.dp)) {
+            Text(text = title, style = androidx.compose.material3.MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Tente novamente mais tarde", modifier = Modifier.padding(horizontal = 24.dp))
+            Text(text = message, style = androidx.compose.material3.MaterialTheme.typography.bodyMedium)
         }
     }
 }

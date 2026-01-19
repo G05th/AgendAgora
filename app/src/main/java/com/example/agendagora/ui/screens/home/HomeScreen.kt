@@ -1,24 +1,21 @@
 package com.example.agendagora.ui.screens.home
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.agendagora.domain.model.Servico
 import com.example.agendagora.ui.components.EmptyState
+import com.example.agendagora.ui.components.GlobalScaffold
 import com.example.agendagora.ui.components.ServiceCard
-import com.example.agendagora.ui.components.PrimaryButton
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,34 +25,61 @@ fun HomeScreen(
     onNavigateToMeusAgendamentos: () -> Unit
 ) {
     val services by viewModel.services.collectAsState()
+    var query by remember { mutableStateOf("") }
+    val snackbarScope = rememberCoroutineScope()
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(
+    GlobalScaffold(topBar = {
+        CenterAlignedTopAppBar(
             title = { Text("AgendAgora") },
             actions = {
                 IconButton(onClick = onNavigateToMeusAgendamentos) {
-                    Icon(imageVector = androidx.compose.material.icons.Icons.Default.List, contentDescription = "Meus agendamentos")
+                    Icon(imageVector = Icons.Default.List, contentDescription = "Meus agendamentos")
                 }
             }
         )
+    }) { snackbarHost ->
+        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+            // Search bar
+            OutlinedTextField(
+                value = query,
+                onValueChange = { query = it },
+                leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = "Pesquisar serviço") },
+                placeholder = { Text("Pesquisar serviço (ex: certidão, identificação)") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-        if (services.isEmpty()) {
-            EmptyState(message = "Nenhum serviço disponível")
-            return@Column
-        }
-
-        LazyColumn(
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxSize()
-        ) {
-            items(services) { servico ->
-                ServiceCard(servico = servico, onAgendar = { onNavigateToAgendamento(servico.id) })
+            // Featured / explanation
+            Surface(modifier = Modifier.fillMaxWidth(), tonalElevation = 2.dp, shape = MaterialTheme.shapes.medium) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(text = "Como funciona", style = MaterialTheme.typography.titleMedium)
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(text = "Escolha um serviço, selecione data e hora, confirme. Nós lhe enviaremos um comprovativo.", style = MaterialTheme.typography.bodyMedium)
+                }
             }
-            item {
-                Spacer(modifier = Modifier.height(64.dp))
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Filtered list
+            val filtered = if (query.isBlank()) services else services.filter { it.title.contains(query, ignoreCase = true) || it.description.contains(query, ignoreCase = true) }
+            if (filtered.isEmpty()) {
+                EmptyState(title = "Nenhum serviço encontrado", message = "Ajuste sua pesquisa ou volte mais tarde")
+                return@GlobalScaffold
+            }
+
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxSize()) {
+                items(filtered) { servico ->
+                    ServiceCard(servico = servico, onAgendar = {
+                        // quick feedback
+                        snackbarScope.launch {
+                            snackbarHost.showSnackbar("Abrindo agendamento para ${servico.title}")
+                        }
+                        onNavigateToAgendamento(servico.id)
+                    })
+                }
+                item { Spacer(modifier = Modifier.height(80.dp)) }
             }
         }
     }
