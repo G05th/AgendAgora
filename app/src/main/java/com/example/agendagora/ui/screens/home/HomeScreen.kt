@@ -1,6 +1,5 @@
 package com.example.agendagora.ui.screens.home
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -24,7 +23,9 @@ fun HomeScreen(
     onNavigateToAgendamento: (serviceId: String) -> Unit,
     onNavigateToMeusAgendamentos: () -> Unit
 ) {
-    val services by viewModel.services.collectAsState()
+    // OBS: especifica initial para resolver "Cannot infer type parameter 'T'"
+    val services by viewModel.services.collectAsState(initial = emptyList())
+
     var query by remember { mutableStateOf("") }
     val snackbarScope = rememberCoroutineScope()
 
@@ -39,7 +40,6 @@ fun HomeScreen(
         )
     }) { snackbarHost ->
         Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-            // Search bar
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
@@ -51,19 +51,20 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Featured / explanation
             Surface(modifier = Modifier.fillMaxWidth(), tonalElevation = 2.dp, shape = MaterialTheme.shapes.medium) {
                 Column(modifier = Modifier.padding(12.dp)) {
                     Text(text = "Como funciona", style = MaterialTheme.typography.titleMedium)
                     Spacer(modifier = Modifier.height(6.dp))
-                    Text(text = "Escolha um serviço, selecione data e hora, confirme. Nós lhe enviaremos um comprovativo.", style = MaterialTheme.typography.bodyMedium)
+                    Text(text = "Escolha um serviço, selecione data e hora, confirme. Receberá um comprovativo.", style = MaterialTheme.typography.bodyMedium)
                 }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Filtered list
-            val filtered = if (query.isBlank()) services else services.filter { it.title.contains(query, ignoreCase = true) || it.description.contains(query, ignoreCase = true) }
+            val filtered = if (query.isBlank()) services else services.filter {
+                it.title.contains(query, ignoreCase = true) || it.description.contains(query, ignoreCase = true)
+            }
+
             if (filtered.isEmpty()) {
                 EmptyState(title = "Nenhum serviço encontrado", message = "Ajuste sua pesquisa ou volte mais tarde")
                 return@GlobalScaffold
@@ -72,7 +73,6 @@ fun HomeScreen(
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxSize()) {
                 items(filtered) { servico ->
                     ServiceCard(servico = servico, onAgendar = {
-                        // quick feedback
                         snackbarScope.launch {
                             snackbarHost.showSnackbar("Abrindo agendamento para ${servico.title}")
                         }

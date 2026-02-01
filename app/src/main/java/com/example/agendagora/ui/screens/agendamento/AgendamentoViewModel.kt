@@ -2,9 +2,7 @@ package com.example.agendagora.ui.screens.agendamento
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.agendagora.data.repository.InMemoryRepository
 import com.example.agendagora.domain.model.Servico
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,25 +21,45 @@ class AgendamentoViewModel : ViewModel() {
     val uiState: StateFlow<AgendamentoUiState> = _uiState.asStateFlow()
 
     fun loadService(serviceId: String) {
-        val s = InMemoryRepository.getAllServices().firstOrNull { it.id == serviceId }
-        _uiState.value = _uiState.value.copy(service = s)
+        viewModelScope.launch {
+            try {
+                _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+                val s = com.example.agendagora.AppContainer.repository.getServiceById(serviceId)
+                _uiState.value = _uiState.value.copy(service = s, isLoading = false)
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(error = "Erro ao carregar serviço", isLoading = false)
+            }
+        }
     }
 
     fun createAgendamento(name: String, dateIso: String, time: String) {
+        val service = _uiState.value.service
+        if (service == null) {
+            _uiState.value = _uiState.value.copy(error = "Serviço inválido")
+            return
+        }
         if (name.isBlank() || dateIso.isBlank() || time.isBlank()) {
             _uiState.value = _uiState.value.copy(error = "Preencha nome, data e hora")
             return
         }
-        val servicoId = _uiState.value.service?.id ?: run {
-            _uiState.value = _uiState.value.copy(error = "Serviço inválido")
-            return
-        }
 
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-            delay(700) // simula I/O
-            InMemoryRepository.createAgendamento(servicoId = servicoId, dateIso = dateIso, time = time, citizenName = name)
-            _uiState.value = _uiState.value.copy(isLoading = false, created = true)
+            try {
+                _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+                com.example.agendagora.AppContainer.repository.createAgendamento(
+                    servicoId = service.id,
+                    dateIso = dateIso,
+                    time = time,
+                    citizenName = name
+                )
+                _uiState.value = _uiState.value.copy(isLoading = false, created = true)
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(isLoading = false, error = "Não foi possível criar agendamento")
+            }
         }
+    }
+
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(error = null)
     }
 }

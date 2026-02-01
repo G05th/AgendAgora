@@ -32,14 +32,18 @@ class LoginViewModel : ViewModel() {
 
         viewModelScope.launch {
             _uiState.value = LoginUiState(loading = true)
-            delay(800) // simulated network
-            // placeholder: real authentication logic or repository call
+            delay(700)
             val success = password.length >= 6
             if (success) {
                 _uiState.value = LoginUiState(loggedIn = true)
+                // TODO: persist token / user in secure storage
             } else {
                 _uiState.value = LoginUiState(error = "Credenciais inválidas")
             }
         }
+    }
+
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(error = null)
     }
 }

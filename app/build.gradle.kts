@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id ("kotlin-kapt")
 }
 
 android {
@@ -42,12 +43,21 @@ android {
 }
 
 dependencies {
+
+    implementation (libs.androidx.room.runtime)
+    annotationProcessor (libs.androidx.room.compiler)
+
+    implementation (libs.androidx.room.ktx)
+    kapt ("androidx.room:room-compiler:2.8.4")
+
+    // Para o ViewModel e LiveData
+    implementation (libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.compose.foundation)
     val nav_version = "2.8.4"
 
-    implementation("androidx.navigation:navigation-compose:$nav_version")
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

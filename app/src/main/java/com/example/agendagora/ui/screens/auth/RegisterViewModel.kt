@@ -40,8 +40,12 @@ class RegisterViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.value = RegisterUiState(loading = true)
             delay(900)
-            // placeholder: call to repository to create user
+            // TODO: call repository / API to create user and persist token
             _uiState.value = RegisterUiState(registered = true)
         }
+    }
+
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(error = null)
     }
 }
