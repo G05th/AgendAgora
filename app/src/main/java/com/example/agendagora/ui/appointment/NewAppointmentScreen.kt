@@ -23,9 +23,10 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun NewAppointmentScreen(
     navController: NavController,
-    viewModel: AppointmentViewModel = viewModel()
+    viewModel: AppointmentViewModel = viewModel(),
+    preSelectedService: String = ""
 ) {
-    var selectedService by remember { mutableStateOf("") }
+    var selectedService by remember { mutableStateOf(preSelectedService) }
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     var selectedTime by remember { mutableStateOf<LocalTime?>(null) }
     var location by remember { mutableStateOf("") }

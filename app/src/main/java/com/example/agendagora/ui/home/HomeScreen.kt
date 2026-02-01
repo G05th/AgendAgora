@@ -60,7 +60,7 @@ fun HomeScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { /* Futura tela: Serviços Disponíveis */ },
+            onClick = { navController.navigate(Screen.ServicesAvailable.route) },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Serviços Públicos Disponíveis")
