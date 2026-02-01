@@ -8,6 +8,7 @@ import com.example.agendagora.ui.splash.SplashScreen
 import com.example.agendagora.ui.auth.LoginScreen
 import com.example.agendagora.ui.auth.RegisterScreen
 import com.example.agendagora.ui.home.HomeScreen
+import com.example.agendagora.ui.appointment.NewAppointmentScreen
 
 
 @Composable
@@ -29,6 +30,9 @@ fun AppNavigation() {
         }
         composable(Screen.Home.route) {
             HomeScreen(navController)
+        }
+        composable(Screen.NewAppointment.route) {
+            NewAppointmentScreen(navController)
         }
     }
 }

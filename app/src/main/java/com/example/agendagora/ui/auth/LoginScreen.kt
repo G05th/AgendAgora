@@ -7,14 +7,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.agendagora.navigation.Screen
+import com.example.agendagora.viewmodel.AuthViewModel
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(
+    navController: NavController,
+    viewModel: AuthViewModel = viewModel()
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf("") }
+
+    val authState by viewModel.authState.collectAsState()
+
+    LaunchedEffect(authState.isSuccess) {
+        if (authState.isSuccess && authState.user != null) {
+            navController.navigate(Screen.Home.route) {
+                popUpTo(Screen.Login.route) { inclusive = true }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -31,7 +45,8 @@ fun LoginScreen(navController: NavController) {
             value = email,
             onValueChange = { email = it },
             label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !authState.isLoading
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -41,12 +56,13 @@ fun LoginScreen(navController: NavController) {
             onValueChange = { password = it },
             label = { Text("Senha") },
             visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !authState.isLoading
         )
 
-        if (errorMessage.isNotEmpty()) {
+        if (authState.error != null) {
             Text(
-                text = errorMessage,
+                text = authState.error!!,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(top = 8.dp)
             )
@@ -54,17 +70,15 @@ fun LoginScreen(navController: NavController) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        if (authState.isLoading) {
+            CircularProgressIndicator()
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
         Button(
-            onClick = {
-                if (email == "user@exemplo.ao" && password == "123456") {
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
-                    }
-                } else {
-                    errorMessage = "Email ou senha incorretos"
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
+            onClick = { viewModel.login(email.trim(), password) },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !authState.isLoading
         ) {
             Text("Entrar")
         }

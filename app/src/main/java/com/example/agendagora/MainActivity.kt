@@ -1,4 +1,4 @@
-package com.example.agendaagora
+package com.example.agendagora
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
