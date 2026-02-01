@@ -1,12 +1,13 @@
-package com.example.agendagora
+package com.example.agendaagora
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.rememberNavController
-import com.example.agendagora.ui.navigation.NavGraph
+import com.example.agendagora.navigation.AppNavigation
 import com.example.agendagora.ui.theme.AgendAgoraTheme
 
 class MainActivity : ComponentActivity() {
@@ -14,9 +15,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AgendAgoraTheme {
-                Surface(modifier = Modifier) {
-                    val navController = rememberNavController()
-                    NavGraph(navController = navController)
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    AppNavigation()
                 }
             }
         }
