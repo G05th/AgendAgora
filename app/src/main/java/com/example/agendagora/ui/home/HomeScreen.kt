@@ -42,7 +42,7 @@ fun HomeScreen(
         }
 
         Button(
-            onClick = { /* Futura tela: Agendar Novo Serviço */ },
+            onClick = { navController.navigate(Screen.NewAppointment.route) },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Agendar Novo Serviço")

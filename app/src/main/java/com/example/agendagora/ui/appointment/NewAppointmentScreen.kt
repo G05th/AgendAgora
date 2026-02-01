@@ -1,6 +1,8 @@
 package com.example.agendagora.ui.appointment
 
 import android.app.TimePickerDialog
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -10,12 +12,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.agendagora.viewmodel.Appointment
+import com.example.agendagora.data.local.entity.Appointment
 import com.example.agendagora.viewmodel.AppointmentViewModel
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewAppointmentScreen(
@@ -133,7 +136,10 @@ fun NewAppointmentScreen(
                             date = selectedDate!!.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
                             time = selectedTime!!.format(DateTimeFormatter.ofPattern("HH:mm")),
                             location = location,
-                            description = description
+                            description = description,
+                            id = TODO(),
+                            userId = TODO(),
+                            status = TODO()
                         )
                         viewModel.addAppointment(appointment)
                         // Sucesso

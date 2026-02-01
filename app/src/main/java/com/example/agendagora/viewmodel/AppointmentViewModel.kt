@@ -1,21 +1,36 @@
 package com.example.agendagora.viewmodel
 
-import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
-
-data class Appointment(
-    val type: String,
-    val date: String,
-    val time: String,
-    val location: String = "",
-    val description: String = ""
-)
+import androidx.lifecycle.viewModelScope
+import com.example.agendagora.AgendAgoraApplication
+import com.example.agendagora.data.local.entity.Appointment
+import com.example.agendagora.data.repository.AppointmentRepository
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 
 class AppointmentViewModel : ViewModel() {
-    private val _appointments = mutableStateListOf<Appointment>()
-    val appointments: List<Appointment> = _appointments
+
+    private val repository = AppointmentRepository(AgendAgoraApplication.database.appointmentDao())
+    private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+
+    val appointments: Flow<List<Appointment>> = repository.getAllByUser(currentUserId)
 
     fun addAppointment(appointment: Appointment) {
-        _appointments.add(appointment)
+        viewModelScope.launch {
+            repository.insert(appointment.copy(userId = currentUserId))
+        }
+    }
+
+    fun updateAppointment(appointment: Appointment) {
+        viewModelScope.launch {
+            repository.update(appointment)
+        }
+    }
+
+    fun deleteAppointment(appointment: Appointment) {
+        viewModelScope.launch {
+            repository.delete(appointment)
+        }
     }
 }
